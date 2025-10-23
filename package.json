@@ -1,0 +1,31 @@
+{
+  "name": "flightstakefi",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Decentralized flight ticket staking and lending protocol.",
+  "workspaces": [
+    "backend",
+    "contracts",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:contracts": "npm --prefix contracts run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:contracts\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PeterWanjihia/FlightStakeFI.git"
+  },
+  "keywords": [],
+  "author": "Peter Wanjihia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PeterWanjihia/FlightStakeFI/issues"
+  },
+  "homepage": "https://github.com/PeterWanjihia/FlightStakeFI#readme"
+}
