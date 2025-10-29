@@ -1,36 +1,42 @@
 {
-  "name": "contracts",
+  "name": "@flightstakefi/contracts",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "description": "Smart contracts for FlightStakeFi",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "echo 'Running contracts environment server.....'"
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:ticketnft": "hardhat run scripts/deployTicketNFT.js --network sepolia",
+    "deploy:local": "hardhat run scripts/deployTicketNFT.js --network hardhatMainnet",
+    "mint:ticketnft": "hardhat run scripts/mintTicket.js --network sepolia",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "Solidity contracts for TicketNFT, Vaults, and Marketplace.",
   "devDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^4.0.2",
-    "@nomicfoundation/hardhat-ethers-chai-matchers": "^3.0.0",
-    "@nomicfoundation/hardhat-ignition": "^3.0.3",
-    "@nomicfoundation/hardhat-ignition-ethers": "^3.0.3",
-    "@nomicfoundation/hardhat-keystore": "^3.0.2",
-    "@nomicfoundation/hardhat-mocha": "^3.0.4",
-    "@nomicfoundation/hardhat-network-helpers": "^3.0.1",
-    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
-    "@nomicfoundation/hardhat-typechain": "^3.0.0",
-    "@nomicfoundation/hardhat-verify": "^3.0.4",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-ethers": "^3.1.0",
+    "@nomicfoundation/hardhat-ignition": "^0.15.13",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.14",
+    "@nomicfoundation/hardhat-network-helpers": "^1.1.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.1.1",
+    "@nomicfoundation/ignition-core": "^0.15.13",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
     "@types/chai": "^4.3.20",
-    "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.18.12",
-    "chai": "^5.3.3",
+    "@types/node": "^24.9.2",
+    "chai": "^4.5.0",
+    "dotenv": "^16.0.0",
     "ethers": "^6.15.0",
-    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
-    "hardhat": "^3.0.9",
-    "mocha": "^11.7.4",
-    "typescript": "~5.8.0"
+    "hardhat": "^2.22.0",
+    "hardhat-gas-reporter": "^1.0.10",
+    "solidity-coverage": "^0.8.16",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.9.3"
   },
-  "type": "module"
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
 }

@@ -1,57 +1,39 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# FlightStakeFi - Contracts
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+This directory contains the Solidity smart contracts for the FlightStakeFi protocol.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Current Progress: Phase 1 - Core Smart Contracts
 
-## Project Overview
+We are currently in Phase 1, focusing on building the essential on-chain logic.
 
-This example project includes:
+### 1.1 `TicketNFT.sol` (✅ Completed & Deployed)
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+* **Status:** The core `TicketNFT.sol` contract has been successfully coded, deployed, and interacted with on the Sepolia testnet.
+* **Address (Sepolia):** `0x1906909DbdEe75e45fB0daA74577860354Dba3e0`
+    * [View on Etherscan](https://sepolia.etherscan.io/address/0x1906909DbdEe75e45fB0daA74577860354Dba3e0)
+* **Key Features Implemented:**
+    * ERC721 standard compliance.
+    * `ERC721URIStorage` for unique metadata URLs per token.
+    * Custom `State` enum (`IDLE`, `STAKED`, `COLLATERALIZED`, `LISTED`).
+    * Storage for `FlightDetails` (route hash, timestamp, fare tier).
+    * Controlled `mint` function restricted to the deployer (`_minterAddress`).
+    * Public getter functions (`getFlightDetails`, `getTokenState`) to read data.
+    * **Core Security:** Overridden `_update` function enforces that tokens can **only** be transferred if their state is `IDLE`.
+    * Internal `_setTokenState` function for secure state changes (callable only by this contract).
+* **Interaction:** Successfully minted Token ID #1 on Sepolia via the `mintTicket.js` script.
 
-## Usage
+---
 
-### Running Tests
+## Next Steps (Remaining Phase 1 Contracts)
 
-To run all the tests in the project, execute the following command:
+The `TicketNFT.sol` contract is functionally complete for now. We will add the external "Protocol Door" functions (`stake`, `unstake`, etc.) **on-demand** as we build the contracts that need to call them.
 
-```shell
-npx hardhat test
-```
+The immediate next steps are to design and implement the remaining core contracts as outlined in the roadmap:
 
-You can also selectively run the Solidity or `mocha` tests:
+1.  **`PricingOracle.sol`:** To fetch and store the value of each TicketNFT.
+2.  **`StakingVault.sol`:** To handle staking and reward distribution.
+3.  **`LendingPool.sol`:** To manage collateralization and borrowing.
+4.  **`Marketplace.sol`:** For listing and trading TicketNFTs.
+5.  **`LiquidationEngine.sol`:** To handle undercollateralized loans.
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
-
-### Make a deployment to Sepolia
-
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+We will start with `PricingOracle.sol` next.

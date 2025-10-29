@@ -1,40 +1,35 @@
-import { configVariable } from "hardhat/config";
-import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
+import "@nomicfoundation/hardhat-toolbox";
+import "dotenv/config";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config = {
-  plugins: [hardhatToolboxMochaEthersPlugin],
   solidity: {
-    profiles: {
-      default: {
-        version: "0.8.28",
-      },
-      production: {
-        version: "0.8.28",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
       },
     },
   },
   networks: {
-    hardhatMainnet: {
-      type: "edr-simulated",
-      chainType: "l1",
-    },
-    hardhatOp: {
-      type: "edr-simulated",
-      chainType: "op",
+    hardhat: {
+      chainId: 1337,
     },
     sepolia: {
-      type: "http",
-      chainType: "l1",
-      url: configVariable("SEPOLIA_RPC_URL"),
-      accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+      url: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
+      accounts:
+        process.env.SEPOLIA_PRIVATE_KEY !== undefined
+          ? [process.env.SEPOLIA_PRIVATE_KEY]
+          : [],
+      chainId: 11155111,
     },
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
   },
 };
 
