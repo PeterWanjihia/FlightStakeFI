@@ -9,6 +9,8 @@
     "deploy:ticketnft": "hardhat run scripts/deployTicketNFT.js --network sepolia",
     "deploy:local": "hardhat run scripts/deployTicketNFT.js --network hardhatMainnet",
     "mint:ticketnft": "hardhat run scripts/mintTicket.js --network sepolia",
+    "deploy:oracle":"hardhat run scripts/deployPricingOracle.js --network sepolia",
+    "set:price": "hardhat run scripts/setOraclePrice.js --network sepolia",
     "node": "hardhat node",
     "clean": "hardhat clean"
   },
