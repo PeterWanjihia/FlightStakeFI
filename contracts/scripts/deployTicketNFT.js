@@ -42,7 +42,7 @@ async function main() {
   // Verify contract details
   console.log("\n📋 Contract Details:");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  const minterAddress = await ticketNFT.getMinterAddress();
+  const minterAddress = await ticketNFT.getMinter();
   const name = await ticketNFT.name();
   const symbol = await ticketNFT.symbol();
   

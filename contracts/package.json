@@ -11,6 +11,8 @@
     "mint:ticketnft": "hardhat run scripts/mintTicket.js --network sepolia",
     "deploy:oracle":"hardhat run scripts/deployPricingOracle.js --network sepolia",
     "set:price": "hardhat run scripts/setOraclePrice.js --network sepolia",
+    "deploy:vault": "hardhat run scripts/deployVault.js --network sepolia",
+    "test:staking": "hardhat run scripts/testStaking.js --network sepolia",
     "node": "hardhat node",
     "clean": "hardhat clean"
   },

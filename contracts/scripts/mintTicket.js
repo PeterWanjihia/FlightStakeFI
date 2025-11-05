@@ -20,7 +20,7 @@ async function main() {
   console.log(`📍 Found contract at: ${contractAddress}`);
 
   // 3️⃣ Define the data for our new NFT
-  const tokenId = 2; // First token
+  const tokenId = 1; // First token
   const tokenURI = `https://api.flightstake.fi/meta/${tokenId}.json`;
 
   const flightDetails = {

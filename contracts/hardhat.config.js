@@ -18,11 +18,12 @@ const config = {
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
-      accounts:
-        process.env.SEPOLIA_PRIVATE_KEY !== undefined
-          ? [process.env.SEPOLIA_PRIVATE_KEY]
-          : [],
+      accounts: [
+        process.env.SEPOLIA_PRIVATE_KEY,  // This will be 'admin'
+        process.env.SEPOLIA_PRIVATE_KEY1  // This will be 'bob'
+      ].filter(Boolean), // .filter(Boolean) safely removes any keys that are missing
       chainId: 11155111,
+      
     },
   },
   paths: {
