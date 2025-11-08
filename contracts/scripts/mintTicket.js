@@ -62,8 +62,8 @@ async function main() {
   const owner = await ticketNFT.ownerOf(tokenId);
   const state = await ticketNFT.getTokenState(tokenId);
 
-  console.log(`   Owner of Token 1: ${owner}`);
-  console.log(`   State of Token 1: ${state.toString()} (0 = IDLE)`);
+  console.log(`   Owner of Token ${tokenId}: ${owner}`);
+  console.log(`   State of Token ${tokenId}: ${state.toString()} (0 = IDLE)`);
 
   if (owner === minter.address && state.toString() === "0") {
     console.log("✅ Verification successful! Minting worked.");
