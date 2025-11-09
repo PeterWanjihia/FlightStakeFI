@@ -3,6 +3,13 @@ import hre from "hardhat";
 async function main() {
   console.log("🚀 Starting LendingPool deployment...");
 
+  // --- ADD THESE LINES ---
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("📍 Deploying from address:", deployer.address);
+  const balance = await hre.ethers.provider.getBalance(deployer.address);
+  console.log("💰 Account balance:", hre.ethers.formatEther(balance), "ETH");
+  // --- END OF ADDED LINES ---
+
   // 1. Get addresses of dependencies from .env
   const nftAddress = process.env.TICKET_NFT_ADDRESS;
   const oracleAddress = process.env.PRICING_ORACLE_ADDRESS;

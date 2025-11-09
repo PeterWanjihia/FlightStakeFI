@@ -3,6 +3,13 @@ import hre from "hardhat";
 async function main() {
   console.log("🚀 Starting PricingOracle deployment...");
 
+  // --- ADD THESE LINES ---
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("📍 Deploying from address:", deployer.address);
+  const balance = await hre.ethers.provider.getBalance(deployer.address);
+  console.log("💰 Account balance:", hre.ethers.formatEther(balance), "ETH");
+  // --- END OF ADDED LINES ---
+
   // 1. Get the "blueprint" for the contract.
   const OracleFactory = await hre.ethers.getContractFactory("PricingOracle");
   console.log("   Got contract factory (blueprint)...");

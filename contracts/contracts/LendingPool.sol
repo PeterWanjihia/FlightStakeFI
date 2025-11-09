@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-// --- Enums ---
 enum State {
     IDLE,
     STAKED,
@@ -12,7 +11,6 @@ enum State {
     LISTED
 }
 
-// --- Interfaces ---
 interface ITicketNFT {
     function getTokenState(uint256 tokenId) external view returns (State);
     function ownerOf(uint256 tokenId) external view returns (address);
@@ -32,39 +30,39 @@ interface IUSDC {
 }
 
 contract LendingPool is ReentrancyGuard, IERC721Receiver {
-    // --- Contract Addresses ---
     ITicketNFT public immutable ticketNFT;
     IPricingOracle public immutable pricingOracle;
     IUSDC public immutable usdc;
     
     address public liquidationEngineAddress;
     
-    // --- Risk Parameters ---
     uint256 public loanToValue;
     uint256 public liquidationThreshold;
     uint256 public interestRate;
     
     address public immutable i_admin;
     
-    // --- Core Ledgers ---
     mapping(address => uint256[]) private s_userCollateralTokenIds;
     mapping(uint256 => address) public collateralOwner;
     mapping(address => uint256) public userDebt;
     mapping(address => uint256) public lastInterestUpdate;
     
-    // --- Constants ---
     uint256 private constant SECONDS_PER_YEAR = 365 days;
     uint256 private constant RATE_PRECISION = 10000;
     uint256 private constant HF_PRECISION = 1e18;
 
-    // --- Events ---
     event CollateralDeposited(address indexed user, uint256 indexed tokenId, uint256 value);
     event CollateralWithdrawn(address indexed user, uint256 indexed tokenId, uint256 value);
     event Borrowed(address indexed user, uint256 amount);
     event Repaid(address indexed user, uint256 amount);
     event LiquidationEngineSet(address indexed engine);
     event RiskParametersUpdated(uint256 ltv, uint256 threshold, uint256 rate);
-    event CollateralLiquidated(address indexed user, address indexed liquidator, uint256 collateralValue, uint256 debtPaid);
+    event CollateralSeized(address indexed user, address indexed liquidator, uint256[] tokenIds);
+
+    modifier onlyLiquidationEngine() {
+        require(msg.sender == liquidationEngineAddress, "LendingPool: Not the liquidation engine");
+        _;
+    }
 
     constructor(
         address _ticketNFTAddress,
@@ -112,144 +110,103 @@ contract LendingPool is ReentrancyGuard, IERC721Receiver {
     function depositCollateral(uint256 tokenId) external nonReentrant {
         address tokenOwner = ticketNFT.ownerOf(tokenId);
         require(tokenOwner == msg.sender, "LendingPool: Not the token owner");
-        
         State state = ticketNFT.getTokenState(tokenId);
         require(state == State.IDLE, "LendingPool: Token is not IDLE");
-        
         uint256 price = pricingOracle.getPrice(tokenId);
         require(price > 0, "LendingPool: Token has no price");
         require(collateralOwner[tokenId] == address(0), "LendingPool: Token already deposited");
-        
         s_userCollateralTokenIds[msg.sender].push(tokenId);
         collateralOwner[tokenId] = msg.sender;
-        
         ticketNFT.safeTransferFrom(msg.sender, address(this), tokenId);
-        ticketNFT.setTokenState(tokenId, State.COLLATERALIZED);
-        
+        ticketNFT.setTokenState(tokenId, State.COLLATERALIZED); 
         emit CollateralDeposited(msg.sender, tokenId, price);
     }
 
     function borrow(uint256 amount) external nonReentrant {
         _updateInterest(msg.sender);
-        
         uint256 collateralValue = _calculateCollateralValue(msg.sender);
         require(collateralValue > 0, "LendingPool: No collateral deposited");
-        
         uint256 borrowLimit = (collateralValue * loanToValue) / 100;
         uint256 newDebt = userDebt[msg.sender] + amount;
-        
         require(newDebt <= borrowLimit, "LendingPool: Amount exceeds borrow limit");
         require(usdc.balanceOf(address(this)) >= amount, "LendingPool: Insufficient liquidity");
-        
         userDebt[msg.sender] = newDebt;
         if (lastInterestUpdate[msg.sender] == 0) {
             lastInterestUpdate[msg.sender] = block.timestamp;
         }
-        
         bool success = usdc.transfer(msg.sender, amount);
         require(success, "LendingPool: USDC transfer failed");
-        
         emit Borrowed(msg.sender, amount);
     }
 
     function repay(uint256 amount) external nonReentrant returns (uint256) {
-        _updateInterest(msg.sender);
-        
+        _updateInterest(msg.sender); 
         uint256 currentDebt = userDebt[msg.sender];
         require(currentDebt > 0, "LendingPool: No debt to repay");
-        
         uint256 amountToRepay = amount;
         if (amount > currentDebt) {
             amountToRepay = currentDebt;
         }
-        
-        userDebt[msg.sender] -= amountToRepay;
+        userDebt[msg.sender] -= amountToRepay; 
         if (userDebt[msg.sender] == 0) {
             lastInterestUpdate[msg.sender] = 0;
         }
-        
         bool success = usdc.transferFrom(msg.sender, address(this), amountToRepay);
         require(success, "LendingPool: USDC transfer failed");
-        
         emit Repaid(msg.sender, amountToRepay);
         return amountToRepay;
     }
 
     function repayAll() external nonReentrant returns (uint256) {
         _updateInterest(msg.sender);
-        
         uint256 currentDebt = userDebt[msg.sender];
         require(currentDebt > 0, "LendingPool: No debt to repay");
-        
         userDebt[msg.sender] = 0;
         lastInterestUpdate[msg.sender] = 0;
-        
         bool success = usdc.transferFrom(msg.sender, address(this), currentDebt);
         require(success, "LendingPool: USDC transfer failed");
-        
         emit Repaid(msg.sender, currentDebt);
         return currentDebt;
     }
 
     function withdrawCollateral(uint256 tokenId) external nonReentrant {
         require(collateralOwner[tokenId] == msg.sender, "LendingPool: Not collateral owner");
-        
         _updateInterest(msg.sender);
         uint256 currentDebt = userDebt[msg.sender];
-        
         _removeTokenFromUserList(msg.sender, tokenId);
         collateralOwner[tokenId] = address(0);
-        
         uint256 newCollateralValue = _calculateCollateralValue(msg.sender);
         uint256 newBorrowLimit = (newCollateralValue * loanToValue) / 100;
-        
         require(currentDebt <= newBorrowLimit, "LendingPool: Insufficient remaining collateral");
-        
         ticketNFT.safeTransferFrom(address(this), msg.sender, tokenId);
         ticketNFT.setTokenState(tokenId, State.IDLE);
-        
-        uint256 price = pricingOracle.getPrice(tokenId);
+        uint256 price = pricingOracle.getPrice(tokenId); 
         emit CollateralWithdrawn(msg.sender, tokenId, price);
     }
 
-    function liquidate(address user) external nonReentrant {
-        require(msg.sender == liquidationEngineAddress, "LendingPool: Not the liquidation engine");
-        
-        uint256 healthFactor = getHealthFactor(user);
-        require(healthFactor < HF_PRECISION, "LendingPool: Loan is healthy");
-        
+    function seizeCollateral(address user, address liquidator) external onlyLiquidationEngine {
         uint256[] memory tokenIds = s_userCollateralTokenIds[user];
-        uint256 collateralValue = _calculateCollateralValue(user);
-        uint256 debtToPay = getOutstandingDebt(user);
-        
+        require(tokenIds.length > 0, "LendingPool: No collateral to seize");
         delete s_userCollateralTokenIds[user];
         userDebt[user] = 0;
         lastInterestUpdate[user] = 0;
-        
-        for (uint256 i = 0; i < tokenIds.length; i++) {
+        for (uint i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             collateralOwner[tokenId] = address(0);
-            ticketNFT.safeTransferFrom(address(this), liquidationEngineAddress, tokenId);
+            ticketNFT.safeTransferFrom(address(this), liquidator, tokenId);
             ticketNFT.setTokenState(tokenId, State.IDLE);
         }
-        
-        emit CollateralLiquidated(user, msg.sender, collateralValue, debtToPay);
+        emit CollateralSeized(user, liquidator, tokenIds);
     }
 
     function _updateInterest(address user) internal {
         uint256 currentDebt = userDebt[user];
-        if (currentDebt == 0) {
-            return;
-        }
-        
+        if (currentDebt == 0) { return; }
         uint256 lastUpdate = lastInterestUpdate[user];
-        if (lastUpdate == block.timestamp) {
-            return;
-        }
-        
+        if (lastUpdate == block.timestamp) { return; }
         uint256 timeElapsed = block.timestamp - lastUpdate;
-        uint256 accruedInterest = (currentDebt * interestRate * timeElapsed) / (SECONDS_PER_YEAR * RATE_PRECISION);
-        
+        uint256 accruedInterest = (currentDebt * interestRate * timeElapsed) /
+            (SECONDS_PER_YEAR * RATE_PRECISION);
         userDebt[user] = currentDebt + accruedInterest;
         lastInterestUpdate[user] = block.timestamp;
     }
@@ -276,29 +233,20 @@ contract LendingPool is ReentrancyGuard, IERC721Receiver {
 
     function getOutstandingDebt(address user) public view returns (uint256) {
         uint256 currentDebt = userDebt[user];
-        if (currentDebt == 0) {
-            return 0;
-        }
-        
+        if (currentDebt == 0) { return 0; }
         uint256 lastUpdate = lastInterestUpdate[user];
-        if (lastUpdate == block.timestamp) {
-            return currentDebt;
-        }
-        
+        if (lastUpdate == block.timestamp) { return currentDebt; }
         uint256 timeElapsed = block.timestamp - lastUpdate;
         uint256 accruedInterest = (currentDebt * interestRate * timeElapsed) / (SECONDS_PER_YEAR * RATE_PRECISION);
-        
         return currentDebt + accruedInterest;
     }
-
+    
     function getHealthFactor(address user) public view returns (uint256) {
         uint256 collateralValue = _calculateCollateralValue(user);
         uint256 currentDebt = getOutstandingDebt(user);
-        
         if (currentDebt == 0) {
             return type(uint256).max;
         }
-        
         uint256 liquidationValue = (collateralValue * liquidationThreshold) / 100;
         return (liquidationValue * HF_PRECISION) / currentDebt;
     }

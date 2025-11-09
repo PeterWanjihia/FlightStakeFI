@@ -12,6 +12,9 @@ const config = {
       },
     },
   },
+  sourcify: {
+    enabled: true
+  },
   networks: {
     hardhat: {
       chainId: 1337,

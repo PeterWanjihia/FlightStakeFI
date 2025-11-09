@@ -3,6 +3,12 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+enum State {
+    IDLE,
+    STAKED,
+    COLLATERALIZED,
+    LISTED
+}
 interface ITicketNFT {
     function getTokenState(uint256 tokenId) external view returns (State);
     function ownerOf(uint256 tokenId) external view returns (address);
@@ -14,6 +20,8 @@ interface ITicketNFT {
 interface IUSDC {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
     function transfer(address to, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
 }
 
 contract Marketplace is ReentrancyGuard {
