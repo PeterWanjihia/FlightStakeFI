@@ -29,7 +29,7 @@ async function main() {
 
   // --- Test 1: Admin Test ---
   console.log("\n--- TEST 1: ADMIN CAN SET PRICE ---");
-  const tokenId = 1;
+  const tokenId = 2;
   const newPrice = hre.ethers.parseUnits("350", 18);
 
   console.log(`    Calling setPrice(${tokenId}, ${newPrice}) as admin...`);
