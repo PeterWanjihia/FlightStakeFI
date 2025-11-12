@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/**
- * @title PricingOracle
- * @dev Stores and provides the price for each TicketNFT.
- */
+
 contract PricingOracle {
 
     // --- State Variables ---
