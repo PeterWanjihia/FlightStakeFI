@@ -6,7 +6,8 @@
   "workspaces": [
     "backend",
     "contracts",
-    "frontend"    
+    "frontend",
+    "mock-api"  
   ],
   "scripts": {
     "dev:backend": "npm --prefix backend run dev",
