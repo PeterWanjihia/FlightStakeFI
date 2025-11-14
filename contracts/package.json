@@ -9,10 +9,13 @@
     "deploy:ticketnft": "hardhat run scripts/deployTicketNFT.js --network sepolia",
     "deploy:local": "hardhat run scripts/deployTicketNFT.js --network hardhatMainnet",
     "mint:ticketnft": "hardhat run scripts/mintTicket.js --network sepolia",
-    "deploy:oracle":"hardhat run scripts/deployPricingOracle.js --network sepolia",
+    "deploy:oracle": "hardhat run scripts/deployPricingOracle.js --network sepolia",
     "set:price": "hardhat run scripts/setOraclePrice.js --network sepolia",
     "deploy:vault": "hardhat run scripts/deployVault.js --network sepolia",
     "test:staking": "hardhat run scripts/testStaking.js --network sepolia",
+    "deploy:oracle:v2": "hardhat run scripts/deployOraclev2.js --network sepolia",
+    "configure:oracle": "hardhat run scripts/configureOracle.js --network sepolia",
+    "test:pipeline": "hardhat run scripts/test/testOraclePipeline.js --network sepolia",
     "node": "hardhat node",
     "clean": "hardhat clean"
   },
@@ -41,6 +44,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@chainlink/contracts": "^1.2.0",
     "@openzeppelin/contracts": "^5.0.0"
   }
 }

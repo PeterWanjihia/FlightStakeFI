@@ -15,7 +15,10 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:contracts\" \"npm run dev:frontend\"",
     "deploy:ticketnft": "npm --prefix contracts run deploy:ticketnft",
-    "mint:ticketnft": "npm --prefix contracts run mint:ticketnft"
+    "mint:ticketnft": "npm --prefix contracts run mint:ticketnft",
+    "deploy:oracle:v2": "npm --prefix contracts run deploy:oracle:v2",
+    "configure:oracle": "npm --prefix contracts run configure:oracle",
+    "test:pipeline": "npm --prefix contracts run test:pipeline"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"
