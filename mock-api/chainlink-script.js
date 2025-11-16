@@ -5,11 +5,7 @@
  * This one file contains ALL off-chain logic:
  * 1. The Pricing Engine (the "Brain")
  * 2. The Chainlink Script (the "Messenger")
- */
-
-// =========================================
-// DELIVERABLE 2: The Pricing Engine
-// =========================================
+*/
 
 // --- Constants ---
 const SECONDS_PER_DAY = 86400;

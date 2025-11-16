@@ -1,22 +1,22 @@
 {
   "1": {
-    "basePriceUSD": 350,
-    "departureTimestamp": 1768108800,
+    "basePriceUSD": 400,
+    "departureTimestamp": 1779032400,
     "cancellationRisk": 0.10
   },
   "2": {
-    "basePriceUSD": 420,
-    "departureTimestamp": 1741996800,
-    "cancellationRisk": 0.25
+    "basePriceUSD": 500,
+    "departureTimestamp": 1735602000,
+    "cancellationRisk": 0.20
   },
   "3": {
-    "basePriceUSD": 190,
-    "departureTimestamp": 1734048000,
+    "basePriceUSD": 300,
+    "departureTimestamp": 1732501200,
     "cancellationRisk": 0.05
   },
   "4": {
-    "basePriceUSD": 220,
-    "departureTimestamp": 1736640000,
-    "cancellationRisk": 0.12
+    "basePriceUSD": 200,
+    "departureTimestamp": 1730466000,
+    "cancellationRisk": 0.10
   }
 }
