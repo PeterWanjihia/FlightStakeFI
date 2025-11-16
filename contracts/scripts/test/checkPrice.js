@@ -1,5 +1,5 @@
 import hre from "hardhat";
-const TOKEN_ID_TO_TEST = 1;
+const TOKEN_ID_TO_TEST = 4;
 
 async function main() {
   console.log("🚀 Checking price on live Oracle contract...");

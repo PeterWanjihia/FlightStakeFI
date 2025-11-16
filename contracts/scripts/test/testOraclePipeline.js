@@ -1,7 +1,7 @@
 import hre from "hardhat";
 
 // --- CONFIGURATION ---
-const TOKEN_ID_TO_TEST = 3;
+const TOKEN_ID_TO_TEST = 4;
 // ---------------------
 
 // Helper function for delays
