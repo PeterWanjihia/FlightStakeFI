@@ -1,0 +1,247 @@
+this one failed too but here is the fun thing ....the test pipeline we had earlier still works ...Desktop@Peter:~/FlightStakeFi/contracts$ cd ..
+
+Desktop@Peter:~/FlightStakeFi$ npm run test:pipeline 
+
+
+
+> flightstakefi@1.0.0 test:pipeline
+
+> npm --prefix contracts run test:pipeline
+
+
+
+
+
+> @flightstakefi/contracts@1.0.0 test:pipeline
+
+> hardhat run scripts/test/testOraclePipeline.js --network sepolia
+
+
+
+🚀 Starting Phase 2 'Final Exam' Test: The Oracle Pipeline...
+
+======================================================================
+
+
+
+--- 1. SETUP ---
+
+   Signer (Admin): 0xaD4C05EDB1F8B9bF0376034b5308B6B209266C9c
+
+   Oracle Contract: 0x447B618d55F09da1C81D2Df6119E821edEFA3A31
+
+   ✅ Connected to PricingOracle.
+
+
+
+--- 2. PRE-TEST CHECK ---
+
+   Current price for Token 1: $0
+
+   ✅ Price is 0, as expected.
+
+
+
+--- 3. THE TRIGGER ---
+
+   Calling oracle.requestPriceUpdate(1)...
+
+   ✅ Price request sent! (Request ID: 0xca690d773d96b996db3d003f83724efd2c8447b4f559d904a1f01d057e003420)
+
+
+
+--- 4. THE WAIT ---
+
+   The Chainlink DON is now executing your off-chain script.
+
+   This will take 2-5 minutes. Please be patient.
+
+   Waiting for the callback...
+
+   ...checking price...
+
+   ...checking price...
+
+   ...checking price...
+
+
+
+   >>> PRICE RECEIVED! <<<
+
+
+
+--- 5. FINAL VERIFICATION ---
+
+   ✅ PASSED: New price for Token 1 is $181
+
+
+
+======================================================================
+
+🎉 PHASE 2 FULLY TESTED AND FUNCTIONAL! 🚀
+
+======================================================================
+
+Desktop@Peter:~/FlightStakeFi$    
+
+......  ..Desktop@Peter:~/FlightStakeFi/contracts$ npx hardhat run scripts/fund-protocol.js  --network sepolia 
+
+🚀 Starting Protocol Funding & Seeding Script...
+
+======================================================================
+
+
+
+--- 1. CONNECTING TO ACTORS & CONTRACTS ---
+
+   Admin (Alice): 0xaD4C05EDB1F8B9bF0376034b5308B6B209266C9c
+
+   User (Bob):    0xf1f28c6803c8E24DA0C163E978D94419400e0786
+
+   User (Charlie): 0xef36314a7F6F8F5915E8D9a74f2A5e9cf1a28282 (Newly created)
+
+   ✅ Connected to all contracts.
+
+
+
+--- 2. CHECKING ACTOR BALANCES (PRE-FUND) ---
+
+
+
+   --- Admin (Alice) Balances ---
+
+   ETH: 1.490624841841401744 ETH
+
+   USDC: 6518.463061 USDC
+
+
+
+   --- User (Bob) Balances ---
+
+   ETH: 0.039977520687303331 ETH
+
+   USDC: 750.0 USDC
+
+
+
+--- 3. FUNDING THE LENDING POOL ---
+
+   Approving pool to take 500.0 USDC...
+
+   Calling fundPool()...
+
+   ✅ LendingPool is funded.
+
+
+
+--- 4. FUNDING 'BOB' & 'CHARLIE' ---
+
+   Bob already has enough USDC. Skipping.
+
+   Sending 400.0 USDC to Charlie...
+
+   Sending 0.02 ETH to Charlie (for gas)...
+
+   ✅ Actors are funded.
+
+
+
+--- 5. MINTING & PRICING ALL 4 TEST ASSETS ---
+
+
+
+   ========================================
+
+   Processing Token 1...
+
+   Token 1 already minted. Skipping mint.
+
+   Token 1 already has a price: $181
+
+   Skipping oracle request for this token.
+
+
+
+   ========================================
+
+   Processing Token 2...
+
+   Token 2 already minted. Skipping mint.
+
+   Requesting price for Token 2...
+
+   ✅ Price request sent! (Request ID: 0x50bdd3...)
+
+   ...Waiting for Chainlink fulfillment (2-5 mins)...
+
+   ...still waiting...
+
+   ...still waiting...
+
+   ...still waiting...
+
+
+
+❌ Setup script failed:
+
+ConnectTimeoutError: Connect Timeout Error
+
+    at onConnectTimeout (/home/moringa/FlightStakeFi/node_modules/undici/lib/core/connect.js:186:24)
+
+    at /home/moringa/FlightStakeFi/node_modules/undici/lib/core/connect.js:133:46
+
+    at Immediate._onImmediate (/home/moringa/FlightStakeFi/node_modules/undici/lib/core/connect.js:174:9)
+
+    at processImmediate (node:internal/timers:491:21) {
+
+  code: 'UND_ERR_CONNECT_TIMEOUT'
+
+}
+
+Desktop@Peter:~/FlightStakeFi/contracts$ 
+
+
+but weirdly the test pipeline we had earlier worked just fine ...
+Desktop@Peter:~/FlightStakeFi/contracts$ cd ..
+Desktop@Peter:~/FlightStakeFi$ npm run test:pipeline 
+
+> flightstakefi@1.0.0 test:pipeline
+> npm --prefix contracts run test:pipeline
+
+
+> @flightstakefi/contracts@1.0.0 test:pipeline
+> hardhat run scripts/test/testOraclePipeline.js --network sepolia
+
+🚀 Starting Phase 2 'Final Exam' Test: The Oracle Pipeline...
+======================================================================
+
+--- 1. SETUP ---
+   Signer (Admin): 0xaD4C05EDB1F8B9bF0376034b5308B6B209266C9c
+   Oracle Contract: 0x447B618d55F09da1C81D2Df6119E821edEFA3A31
+   ✅ Connected to PricingOracle.
+
+--- 2. PRE-TEST CHECK ---
+   Current price for Token 1: $0
+   ✅ Price is 0, as expected.
+
+--- 3. THE TRIGGER ---
+   Calling oracle.requestPriceUpdate(1)...
+   ✅ Price request sent! (Request ID: 0xca690d773d96b996db3d003f83724efd2c8447b4f559d904a1f01d057e003420)
+
+--- 4. THE WAIT ---
+   The Chainlink DON is now executing your off-chain script.
+   This will take 2-5 minutes. Please be patient.
+   Waiting for the callback...
+   ...checking price...
+   ...checking price...
+   ...checking price...
+
+   >>> PRICE RECEIVED! <<<
+
+--- 5. FINAL VERIFICATION ---
+   ✅ PASSED: New price for Token 1 is $181
+
+======================================================================
+🎉 PHASE 2 FULLY TESTED AND FUNCTIONAL! 🚀
+======================================================================
+Desktop@Peter:~/FlightStakeFi$ 
