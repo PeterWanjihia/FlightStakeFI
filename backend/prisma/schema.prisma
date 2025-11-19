@@ -75,7 +75,7 @@ model Loan {
 
   // Loan Details
   debtAmount    Decimal  @db.Decimal(18, 6) // USDC debt
-  healthFactor  Decimal  @db.Decimal(18, 18) // e.g. 1.5
+  healthFactor  Decimal  @db.Decimal(65, 30)
   updatedAt     DateTime @updatedAt
 }
 
