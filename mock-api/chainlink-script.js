@@ -9,21 +9,21 @@
 
 // --- Constants ---
 const SECONDS_PER_DAY = 86400;
-const MAX_DECAY_DAYS = 90; 
+const MAX_DECAY_DAYS = 90;
 
 function calculateTimeDecay(departureTimestamp) {
   const now = Date.now() / 1000;
   const secondsLeft = departureTimestamp - now;
-  
+
   if (secondsLeft <= 0) {
     return 0.0;
   }
-  
+
   const daysLeft = secondsLeft / SECONDS_PER_DAY;
   if (daysLeft >= MAX_DECAY_DAYS) {
     return 1.0;
   }
-  
+
   return daysLeft / MAX_DECAY_DAYS;
 }
 
@@ -38,7 +38,7 @@ function calculateFinalPrice(apiData) {
 
   const timeFactor = calculateTimeDecay(departureTime);
   const timeAdjustedPrice = basePrice * timeFactor;
-  
+
   const riskPenalty = calculateRiskPenalty(basePrice, risk);
 
   let finalPrice = timeAdjustedPrice - riskPenalty;
@@ -46,8 +46,9 @@ function calculateFinalPrice(apiData) {
   if (finalPrice < 0) {
     finalPrice = 0;
   }
-  
-  return Math.floor(finalPrice);
+
+  // Scale to USDC decimals (6)
+  return Math.floor(finalPrice * 1_000_000);
 }
 
 // =========================================

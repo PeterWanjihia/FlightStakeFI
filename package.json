@@ -7,7 +7,7 @@
     "backend",
     "contracts",
     "frontend",
-    "mock-api"  
+    "mock-api"
   ],
   "scripts": {
     "dev:backend": "npm --prefix backend run dev",
