@@ -116,8 +116,10 @@ async function handleTokenStaked(user, tokenId, event) {
             where: { tokenId: id },
             data: { state: 'STAKED' }
         }),
-        prisma.stake.create({
-            data: {
+        prisma.stake.upsert({
+            where: { ticketId: id },
+            update: { userAddress: user },
+            create: {
                 userAddress: user,
                 ticketId: id
             }
@@ -149,8 +151,14 @@ async function handleCollateralDeposited(user, tokenId, event) {
             where: { tokenId: id },
             data: { state: 'COLLATERALIZED' }
         }),
-        prisma.loan.create({
-            data: {
+        prisma.loan.upsert({
+            where: { ticketId: id },
+            update: {
+                userAddress: user,
+                debtAmount: 0,
+                healthFactor: 100
+            },
+            create: {
                 userAddress: user,
                 ticketId: id,
                 debtAmount: 0,
@@ -209,8 +217,13 @@ async function handleItemListed(seller, tokenId, price, event) {
             where: { tokenId: id },
             data: { state: 'LISTED' }
         }),
-        prisma.listing.create({
-            data: {
+        prisma.listing.upsert({
+            where: { ticketId: id },
+            update: {
+                sellerAddress: seller,
+                price: ethers.formatUnits(price, 6)
+            },
+            create: {
                 sellerAddress: seller,
                 ticketId: id,
                 price: ethers.formatUnits(price, 6)
