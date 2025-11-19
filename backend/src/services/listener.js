@@ -37,11 +37,8 @@ async function main() {
 
     const provider = new ethers.WebSocketProvider(WSS_URL);
 
-    // Keep connection alive
-    provider._websocket.on("close", async (code) => {
-        console.log(`⚠️ Connection lost (code ${code}). Reconnecting in 5s...`);
-        setTimeout(main, 5000);
-    });
+    // Keep connection alive (Ethers v6 handles this better, or we rely on process restart)
+    // provider._websocket.on("close", ...);
 
     // --- INITIALIZE CONTRACTS ---
     const ticketNFT = new ethers.Contract(ADDRESSES.TicketNFT, loadABI("TicketNFT"), provider);
@@ -60,6 +57,12 @@ async function main() {
 
         try {
             const id = Number(tokenId);
+            // Ensure Users exist FIRST
+            await prisma.user.upsert({ where: { address: to }, update: {}, create: { address: to } });
+            if (from !== ethers.ZeroAddress) {
+                await prisma.user.upsert({ where: { address: from }, update: {}, create: { address: from } });
+            }
+
             // Upsert Ticket
             await prisma.ticket.upsert({
                 where: { tokenId: id },
@@ -71,12 +74,6 @@ async function main() {
                     price: 0
                 }
             });
-
-            // Ensure Users exist
-            await prisma.user.upsert({ where: { address: to }, update: {}, create: { address: to } });
-            if (from !== ethers.ZeroAddress) {
-                await prisma.user.upsert({ where: { address: from }, update: {}, create: { address: from } });
-            }
 
             // Log Transaction
             await prisma.transaction.create({
@@ -196,7 +193,7 @@ async function main() {
         } catch (e) { console.error(e); }
     });
 
-    marketplace.on("ItemCanceled", async (seller, tokenId, event) => {
+    marketplace.on("ListingCancelled", async (seller, tokenId, event) => {
         console.log(`[Canceled] Listing for Token ${tokenId}`);
         try {
             await prisma.ticket.update({

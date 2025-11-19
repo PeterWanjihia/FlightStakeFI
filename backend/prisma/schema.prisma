@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -25,7 +25,7 @@ model Ticket {
   owner       User     @relation(fields: [ownerAddress], references: [address])
   status      String   @default("IDLE") // IDLE, STAKED, COLLATERALIZED, LISTED
   price       Float    @default(0)
-  flightData  Json?    // Stores the raw flight details from the API
+  flightData  String?  // Stores the raw flight details from the API (JSON string)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   listing     Listing?
