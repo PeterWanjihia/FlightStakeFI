@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +8,56 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  address     String   @id
+  totalVolume Float    @default(0)
+  tickets     Ticket[]
+  listings    Listing[]
+  transactions Transaction[]
+  createdAt   DateTime @default(now())
+}
+
+model Ticket {
+  tokenId     Int      @id
+  ownerAddress String
+  owner       User     @relation(fields: [ownerAddress], references: [address])
+  status      String   @default("IDLE") // IDLE, STAKED, COLLATERALIZED, LISTED
+  price       Float    @default(0)
+  flightData  Json?    // Stores the raw flight details from the API
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  listing     Listing?
+}
+
+model Listing {
+  id          Int      @id @default(autoincrement())
+  tokenId     Int      @unique
+  ticket      Ticket   @relation(fields: [tokenId], references: [tokenId])
+  sellerAddress String
+  seller      User     @relation(fields: [sellerAddress], references: [address])
+  price       Float
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  hash        String   @unique
+  type        String   // MINT, STAKE, UNSTAKE, DEPOSIT, BORROW, REPAY, WITHDRAW, LIST, BUY, CANCEL
+  userAddress String
+  user        User     @relation(fields: [userAddress], references: [address])
+  tokenId     Int?
+  amount      Float?
+  timestamp   DateTime @default(now())
+}
+
+model EventLog {
+  id          Int      @id @default(autoincrement())
+  blockNumber Int
+  txHash      String
+  eventName   String
+  processed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
