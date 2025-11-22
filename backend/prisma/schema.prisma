@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,105 +7,96 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- Enums (Matching your Solidity Enums) ---
-enum TicketState {
-  IDLE
-  STAKED
-  COLLATERALIZED
-  LISTED
-}
-
-// --- Core Entities ---
-
+// --- 1. THE USER (Identity) ---
 model User {
-  id            String   @id @default(uuid())
-  walletAddress String   @unique // The "Global ID" (e.g., 0xAlice...)
-  email         String?  @unique // For notifications (linked via Privy)
-  createdAt     DateTime @default(now())
+  address         String   @id  // Wallet Address (0x...)
+  email           String?       // From Privy (for notifications)
+  isWorldIdVerified Boolean @default(false) // From World ID
+  createdAt       DateTime @default(now())
 
-  // Relationships
-  tickets   Ticket[]  // All tickets this user currently owns (on-chain owner)
-  loans     Loan[]    // Active loans this user has taken
-  stakes    Stake[]   // Active stakes this user has made
-  listings  Listing[] // Active marketplace listings
+  // Reverse Lookups
+  tickets         Ticket[]
+  loans           Loan[]
+  stakes          Stake[]
+  listings        Listing[]
 }
 
+// --- 2. THE ASSET (The Flight Ticket) ---
 model Ticket {
-  id        String   @id @default(uuid())
-  tokenId   Int      @unique // The on-chain Token ID (1, 2, 3...)
+  tokenId         Int      @id // The On-Chain ID
   
-  // Flight Data (Cached from Metadata/Mock API)
-  departureTime Int
-  route         String
-  basePrice     Decimal  @db.Decimal(18, 2) 
+  ownerAddress    String
+  owner           User     @relation(fields: [ownerAddress], references: [address])
+
+  // State Machine: "IDLE", "STAKED", "COLLATERALIZED", "LISTED"
+  status          String   @default("IDLE") 
+
+  // Static Data (Cached from API to save speed)
+  pnr             String?  // "DELTA-882"
+  departureTime   Int      // Unix Timestamp
+  route           String   // "JFK -> LHR"
   
-  // Dynamic On-Chain State
-  state     TicketState @default(IDLE)
-  
-  // Valuation (Updated by Oracle Events)
-  currentPrice Decimal  @db.Decimal(18, 2)
+  // Valuation (Chainlink Data)
+  price           String   @default("0") // Stored as String to handle decimals safely
   lastPriceUpdate DateTime @default(now())
 
-  // Relationships
-  ownerAddress String
-  owner        User   @relation(fields: [ownerAddress], references: [walletAddress])
+  // Exclusive States (A ticket can only be ONE of these at a time)
+  loan            Loan?
+  stake           Stake?
+  listing         Listing?
   
-  // A ticket can be ONE of these things at a time:
-  activeLoan    Loan?
-  activeStake   Stake?
-  activeListing Listing?
-
-  // History
-  priceHistory  PriceUpdate[]
+  // History for Charts
+  priceHistory    PriceUpdate[]
 }
 
-// --- Protocol Entities (The "Mirrors") ---
+// --- 3. THE MONEY LEGOS (Active States) ---
 
 model Loan {
-  id        String   @id @default(uuid())
-  userAddress String
-  user        User     @relation(fields: [userAddress], references: [walletAddress])
+  id           String   @id @default(uuid())
   
-  // The collateral is a specific Ticket
-  ticketId  Int      @unique
-  ticket    Ticket   @relation(fields: [ticketId], references: [tokenId])
-
-  // Loan Details
-  debtAmount    Decimal  @db.Decimal(18, 6) // USDC debt
-  healthFactor  Decimal  @db.Decimal(65, 30)
-  updatedAt     DateTime @updatedAt
+  ticketId     Int      @unique // One loan per ticket
+  ticket       Ticket   @relation(fields: [ticketId], references: [tokenId])
+  
+  userAddress  String
+  user         User     @relation(fields: [userAddress], references: [address])
+  
+  debt         String   // USDC Debt (String for precision)
+  healthFactor String   // Calculated Risk Score
+  
+  updatedAt    DateTime @updatedAt
 }
 
 model Stake {
-  id        String   @id @default(uuid())
-  userAddress String
-  user        User     @relation(fields: [userAddress], references: [walletAddress])
-
-  ticketId  Int      @unique
-  ticket    Ticket   @relation(fields: [ticketId], references: [tokenId])
-
-  stakedAt  DateTime @default(now())
+  id           String   @id @default(uuid())
+  
+  ticketId     Int      @unique
+  ticket       Ticket   @relation(fields: [ticketId], references: [tokenId])
+  
+  userAddress  String
+  user         User     @relation(fields: [userAddress], references: [address])
+  
+  stakedAt     DateTime @default(now()) // Used to calc rewards on frontend
 }
 
 model Listing {
-  id        String   @id @default(uuid())
+  id           String   @id @default(uuid())
+  
+  ticketId     Int      @unique
+  ticket       Ticket   @relation(fields: [ticketId], references: [tokenId])
+  
   sellerAddress String
-  seller        User     @relation(fields: [sellerAddress], references: [walletAddress])
-
-  ticketId  Int      @unique
-  ticket    Ticket   @relation(fields: [ticketId], references: [tokenId])
-
-  price     Decimal  @db.Decimal(18, 6) // USDC Price
-  listedAt  DateTime @default(now())
+  seller        User     @relation(fields: [sellerAddress], references: [address])
+  
+  price        String   // Asking Price in USDC
+  listedAt     DateTime @default(now())
 }
 
-// --- History Tables (For Charts) ---
-
+// --- 4. ANALYTICS ---
 model PriceUpdate {
   id        String   @id @default(uuid())
   ticketId  Int
   ticket    Ticket   @relation(fields: [ticketId], references: [tokenId])
   
-  price     Decimal  @db.Decimal(18, 2)
+  price     String
   timestamp DateTime @default(now())
 }

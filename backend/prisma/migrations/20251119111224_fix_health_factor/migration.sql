@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Loan" ALTER COLUMN "healthFactor" SET DATA TYPE DECIMAL(65,30);
